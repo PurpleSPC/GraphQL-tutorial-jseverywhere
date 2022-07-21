@@ -8,11 +8,11 @@ scalar DateTime
 type Note {
     id: ID!
     content: String!
-    author: String!
+    author: User!
     createdAt: DateTime!
     updatedAt: DateTime!
     favoriteCount: Int!
-    favoritedBy: [User!]
+    favoritedBy: [User]
 }
 
 type User{
@@ -24,12 +24,20 @@ type User{
     favorites: [Note!]!
 }
 
+# a type for cursor-based pagination of a noteFeed query
+type noteFeed {
+    notes: [Note]!
+    cursor: String!
+    hasNextPage: Boolean!
+}
+
 type Query {
     notes: [Note!]!
     note(id:ID!): Note!
     user(username: String!): User
     users: [User!]!
     me: User!
+    noteFeed(cursor: String): noteFeed
 }
 
 type Mutation {

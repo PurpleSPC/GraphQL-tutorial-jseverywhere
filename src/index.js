@@ -1,7 +1,12 @@
+const helmet = require('helmet');
 const express = require('express');
 const {ApolloServer} = require('apollo-server-express');
 const jwt = require('jsonwebtoken');
+const cors = require('cors');
 require('dotenv').config();
+const depthLimit = require('graphql-depth-limit');
+const {createComplexityLimitRule} = require('graphql-validation-complexity');
+
 
 //local module imports
 const models = require('./models');
@@ -16,6 +21,12 @@ const DB_HOST = process.env.DB_HOST;
 
 //runs js express server
 const app = express();
+
+//run helmet middleware for security
+app.use(helmet());
+
+//enable Cross Origin Resource Sharing
+app.use(cors());
 
 //connect to db
 db.connect(DB_HOST);
@@ -37,8 +48,9 @@ const getUser = token => {
 const server = new ApolloServer({
     typeDefs, 
     resolvers,
+    validationRules: [depthLimit(5), createComplexityLimitRule(1000)],
     context: ({req}) => {
-        //get eh user token from header
+        //get the user token from header
         const token = req.headers.authorization;
         // try to retreive a user ID with token
         const user = getUser(token);
